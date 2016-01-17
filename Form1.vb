@@ -1,4 +1,6 @@
-﻿Public Class Form1
+﻿Imports System.Net
+
+Public Class Form1
     Private Sub TextBox1_KeyDown(sender As Object, e As KeyEventArgs) Handles TextBox1.KeyDown
         If e.Control AndAlso e.Shift AndAlso e.KeyCode = Keys.Enter Then
             TextBox2.Clear()
@@ -20,15 +22,15 @@
                 URL = URL.Replace("|", "\|")
                 URL = URL.Replace("~", "\~")
                 Try
-
-                    Dim wc As New Net.WebClient
-                    wc.Encoding = System.Text.Encoding.UTF8
-                    Dim html As String = wc.DownloadString(escapedURL)
+                    Dim html_byte(10000 - 1) As Byte
+                    Using sr As IO.Stream = DirectCast(WebRequest.Create(escapedURL), HttpWebRequest).GetResponse.GetResponseStream
+                        sr.Read(html_byte, 0, 10000)
+                    End Using
+                    Dim html As String = System.Text.Encoding.UTF8.GetString(html_byte)
 
                     'HACK:エンコーディングをきちんと見るべき
                     If html.IndexOf("UTF-8", StringComparison.CurrentCultureIgnoreCase) = -1 Then
-                        wc.Encoding = System.Text.Encoding.GetEncoding("Shift_JIS")
-                        html = wc.DownloadString(escapedURL)
+                        html = System.Text.Encoding.GetEncoding("Shift_JIS").GetString(html_byte)
                     End If
 
                     Dim title As String
@@ -50,10 +52,8 @@
     End Sub
 
     Private Sub TextBox2_KeyDown(sender As Object, e As KeyEventArgs) Handles TextBox2.KeyDown
-        If e.Control Then
-            If e.KeyCode = Keys.A Then
-                TextBox2.SelectAll()
-            End If
+        If e.Control AndAlso e.KeyCode = Keys.A Then
+            TextBox2.SelectAll()
         End If
     End Sub
 End Class
