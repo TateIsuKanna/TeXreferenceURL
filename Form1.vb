@@ -41,7 +41,7 @@ Public Class Form1
                         Dim title_end As Integer = html.IndexOf("</title>", StringComparison.CurrentCultureIgnoreCase)
                         title = html.Substring(title_start, title_end - title_start)
                     End If
-                    TextBox2.Text &= "\bibitem{}「" & title & "」\\" & URL & " 閲覧日" & Now.Year & "年" & Now.Month & "月日" & vbCrLf
+                    TextBox2.Text &= "\bibitem{}「" & title & "」\\" & URL & " 閲覧日" & Now.ToString("yyyy年M月d日") & vbCrLf
                 Catch ex As Exception
                     TextBox2.Text &= vbCrLf & escapedURL & "について" & vbCrLf & ex.Message & vbCrLf
                 End Try
