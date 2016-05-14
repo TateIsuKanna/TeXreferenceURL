@@ -130,3 +130,8 @@ UpgradeLog*.htm
 # SQL Server files
 App_Data/*.mdf
 App_Data/*.ldf
+TeXreferenceURL/bin/Release/TeXreferenceURL.exe.config
+TeXreferenceURL/bin/Release/TeXreferenceURL.xml
+TeXreferenceURL/bin/Release/TeXreferenceURL.vshost.exe
+TeXreferenceURL/bin/Release/TeXreferenceURL.vshost.exe.manifest
+TeXreferenceURL/bin/Release/TeXreferenceURL.vshost.exe.config
