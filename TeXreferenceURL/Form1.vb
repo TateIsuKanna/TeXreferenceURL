@@ -2,26 +2,49 @@
 Imports System.Text
 
 Public Class Form1
-    Private Sub TextBox1_KeyDown(sender As Object, e As KeyEventArgs) Handles TextBox1.KeyDown
-        If e.Control AndAlso e.Shift AndAlso e.KeyCode = Keys.Enter Then
-            TextBox2.Clear()
-            For Each escapedURL In TextBox1.Lines
-                Dim URL As String = System.Web.HttpUtility.UrlDecode(escapedURL)
+	Private Sub TextBox1_KeyDown(sender As Object, e As KeyEventArgs)
 
-                'エスケープする
-                URL = URL.Replace("\", "\\") 'エスケープに使うから最初にする
+	End Sub
+
+	Private Sub TextBox2_KeyDown(sender As Object, e As KeyEventArgs) Handles TextBox2.KeyDown
+		If e.Control AndAlso e.KeyCode = Keys.A Then
+			TextBox2.SelectAll()
+		End If
+	End Sub
+
+	Private Sub ListBox1_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ListBox1.SelectedIndexChanged
+
+	End Sub
+
+	Private Sub ListBox1_KeyDown(sender As Object, e As KeyEventArgs) Handles ListBox1.KeyDown
+		If e.Control AndAlso e.KeyCode = Keys.V Then
+			ListBox1.Items.Add(Clipboard.GetText)
+		End If
+
+		If ListBox1.SelectedIndex > -1 Then
+			If e.KeyCode = Keys.Delete Then
+				ListBox1.Items.RemoveAt(ListBox1.SelectedIndex)
+			End If
+		End If
+
+		If e.Control AndAlso e.Shift AndAlso e.KeyCode = Keys.Enter Then
+			TextBox2.Clear()
+			For Each escapedURL As String In ListBox1.Items
+				Dim URL As String = Web.HttpUtility.UrlDecode(escapedURL)
+
+				URL = URL.Replace("\", "\\") 'エスケープに使うから最初にエスケープ
                 URL = URL.Replace("_", "\_")
-                URL = URL.Replace("%", "\%")
-                URL = URL.Replace("#", "\#")
-                URL = URL.Replace("$", "\$")
-                URL = URL.Replace("&", "\&")
-                URL = URL.Replace("{", "\{")
-                URL = URL.Replace("}", "\}")
-                URL = URL.Replace("<", "\<")
-                URL = URL.Replace(">", "\>")
-                URL = URL.Replace("^", "\^")
-                URL = URL.Replace("|", "\|")
-                URL = URL.Replace("~", "\~")
+				URL = URL.Replace("%", "\%")
+				URL = URL.Replace("#", "\#")
+				URL = URL.Replace("$", "\$")
+				URL = URL.Replace("&", "\&")
+				URL = URL.Replace("{", "\{")
+				URL = URL.Replace("}", "\}")
+				URL = URL.Replace("<", "\<")
+				URL = URL.Replace(">", "\>")
+				URL = URL.Replace("^", "\^")
+				URL = URL.Replace("|", "\|")
+				URL = URL.Replace("~", "\~")
 				Try
 					Dim html_byte() As Byte
 					Dim wc As New WebClient
@@ -61,15 +84,9 @@ Public Class Form1
 				Catch ex As Exception
 					TextBox2.Text &= vbCrLf & escapedURL & "について" & vbCrLf & ex.ToString & vbCrLf
 				End Try
-            Next
-            TextBox2.Focus()
-            TextBox2.SelectAll()
-        End If
-    End Sub
-
-    Private Sub TextBox2_KeyDown(sender As Object, e As KeyEventArgs) Handles TextBox2.KeyDown
-        If e.Control AndAlso e.KeyCode = Keys.A Then
-            TextBox2.SelectAll()
-        End If
-    End Sub
+			Next
+			TextBox2.Focus()
+			TextBox2.SelectAll()
+		End If
+	End Sub
 End Class
