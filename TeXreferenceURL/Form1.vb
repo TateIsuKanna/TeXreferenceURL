@@ -1,4 +1,5 @@
 ﻿Imports System.Net
+Imports System.Text
 
 Public Class Form1
     Private Sub TextBox1_KeyDown(sender As Object, e As KeyEventArgs) Handles TextBox1.KeyDown
@@ -21,30 +22,45 @@ Public Class Form1
                 URL = URL.Replace("^", "\^")
                 URL = URL.Replace("|", "\|")
                 URL = URL.Replace("~", "\~")
-                Try
-                    Dim html_byte(10000 - 1) As Byte
-                    Using sr As IO.Stream = DirectCast(WebRequest.Create(escapedURL), HttpWebRequest).GetResponse.GetResponseStream
-                        sr.Read(html_byte, 0, 10000)
-                    End Using
-                    Dim html As String = System.Text.Encoding.UTF8.GetString(html_byte)
+				Try
+					Dim html_byte() As Byte
+					Dim wc As New WebClient
+					html_byte = wc.DownloadData(escapedURL)
+					Dim ContentType As String = wc.ResponseHeaders.Item(HttpResponseHeader.ContentType)
+					Dim httpheader_charset_begin As Integer = ContentType.IndexOf("charset=")
 
-                    'HACK:エンコーディングをきちんと見るべき
-                    If html.IndexOf("UTF-8", StringComparison.CurrentCultureIgnoreCase) = -1 Then
-                        html = System.Text.Encoding.GetEncoding("Shift_JIS").GetString(html_byte)
-                    End If
+					Dim html As String
 
-                    Dim title As String
-                    Dim title_start As Integer = html.IndexOf("<title>", StringComparison.CurrentCultureIgnoreCase) + "<title>".Length
-                    If title_start = -1 + "<title>".Length Then
-                        title = ""
-                    Else
-                        Dim title_end As Integer = html.IndexOf("</title>", StringComparison.CurrentCultureIgnoreCase)
-                        title = html.Substring(title_start, title_end - title_start)
-                    End If
-                    TextBox2.Text &= "\bibitem{}「" & title & "」\\" & URL & " 閲覧日" & Now.ToString("yyyy年M月d日") & vbCrLf
-                Catch ex As Exception
-                    TextBox2.Text &= vbCrLf & escapedURL & "について" & vbCrLf & ex.Message & vbCrLf
-                End Try
+					If httpheader_charset_begin > -1 Then
+						httpheader_charset_begin += "charset=".Length
+						Dim htmlenc As String = ContentType.Substring(httpheader_charset_begin, ContentType.Length - httpheader_charset_begin)
+						html = Encoding.GetEncoding(htmlenc).GetString(html_byte)
+					Else
+						html = Encoding.ASCII.GetString(html_byte)
+
+						Dim html_charset_begin As Integer = html.IndexOf("charset=")
+						If html_charset_begin > -1 Then
+							html_charset_begin += "charset=".Length
+							Dim htmlenc As String = html.Substring(html_charset_begin, html.IndexOf("""", html_charset_begin) - html_charset_begin)
+							html = Encoding.GetEncoding(htmlenc).GetString(html_byte)
+						Else
+							html = Encoding.UTF8.GetString(html_byte)
+						End If
+					End If
+
+					Dim title As String
+					Dim title_begin As Integer = html.IndexOf("<title>", StringComparison.CurrentCultureIgnoreCase)
+					If title_begin = -1 Then
+						title = ""
+					Else
+						title_begin += "<title>".Length
+						Dim title_end As Integer = html.IndexOf("</title>", title_begin, StringComparison.CurrentCultureIgnoreCase)
+						title = html.Substring(title_begin, title_end - title_begin)
+					End If
+					TextBox2.Text &= "\bibitem{}「" & title & "」\\" & URL & " 閲覧日" & Now.ToString("yyyy年M月d日") & vbCrLf
+				Catch ex As Exception
+					TextBox2.Text &= vbCrLf & escapedURL & "について" & vbCrLf & ex.ToString & vbCrLf
+				End Try
             Next
             TextBox2.Focus()
             TextBox2.SelectAll()
