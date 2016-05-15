@@ -2,10 +2,6 @@
 Imports System.Text
 
 Public Class Form1
-	Private Sub TextBox1_KeyDown(sender As Object, e As KeyEventArgs)
-
-	End Sub
-
 	Private Sub TextBox2_KeyDown(sender As Object, e As KeyEventArgs) Handles TextBox2.KeyDown
 		If e.Control AndAlso e.KeyCode = Keys.A Then
 			TextBox2.SelectAll()
@@ -15,6 +11,10 @@ Public Class Form1
 	Private Sub ListBox1_KeyDown(sender As Object, e As KeyEventArgs) Handles ListBox1.KeyDown
 		If e.Control AndAlso e.KeyCode = Keys.V Then
 			ListBox1.Items.Add(Clipboard.GetText)
+		End If
+
+		If e.Control AndAlso e.KeyCode = Keys.A Then
+			ListBox1.Items.Add(InputBox("URLか書名を入力して下さい．"))
 		End If
 
 		If ListBox1.SelectedIndex > -1 Then
@@ -86,7 +86,7 @@ Public Class Form1
 		escapedText = escapedText.Replace("%", "\%")
 		escapedText = escapedText.Replace("#", "\#")
 		escapedText = escapedText.Replace("$", "\$")
-			escapedText = escapedText.Replace("&", "\&")
+		escapedText = escapedText.Replace("&", "\&")
 		escapedText = escapedText.Replace("{", "\{")
 		escapedText = escapedText.Replace("}", "\}")
 		escapedText = escapedText.Replace("<", "\<")
@@ -109,13 +109,11 @@ Public Class Amazon_book
 
 		Dim html As String = wc.DownloadString("http://www.amazon.co.jp/s/ref=nb_sb_noss_1?__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&url=search-alias%3Dstripbooks&field-keywords=" & book_name)
 
-
 		Dim html_firstitem As String = RegularExpressions.Regex.Match(html, "result_[\s\S]+?</li>").Groups.Item(0).Value
 		For Each b As RegularExpressions.Match In RegularExpressions.Regex.Matches(RegularExpressions.Regex.Matches(html_firstitem, "a-row a-spacing-mini[\s\S]+?</div>").Item(1).Value, "(?<="">).+?(?=</span>)")
 			Dim tmp As String = b.Value
 			tmp = RegularExpressions.Regex.Replace(tmp, "<a.+?>", "")
 			tmp = RegularExpressions.Regex.Replace(tmp, "</a>", "")
-			MsgBox(tmp)
 			author &= tmp.Replace(" ", "") & " "
 		Next
 	End Sub

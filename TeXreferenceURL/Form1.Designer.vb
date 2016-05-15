@@ -49,9 +49,9 @@ Partial Class Form1
 		Me.Label1.AutoSize = True
 		Me.Label1.Location = New System.Drawing.Point(12, 9)
 		Me.Label1.Name = "Label1"
-		Me.Label1.Size = New System.Drawing.Size(406, 12)
+		Me.Label1.Size = New System.Drawing.Size(539, 12)
 		Me.Label1.TabIndex = 0
-		Me.Label1.Text = "URLを列挙して下さい．Ctrl+V:貼り付け ↑↓:選択 Del:削除 Ctrl+Shift+Enter:生成"
+		Me.Label1.Text = "URLか書名を列挙して下さい．Ctrl+V:貼り付け Ctrl+A:手入力追加 ↑↓:選択 Del:削除 Ctrl+Shift+Enter:生成"
 		'
 		'SplitContainer1
 		'
