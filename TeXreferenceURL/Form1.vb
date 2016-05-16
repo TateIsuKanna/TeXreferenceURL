@@ -69,7 +69,7 @@ Public Class Form1
 						TextBox2.AppendText(vbCrLf & "エラー " & escapedURL & "について" & vbCrLf & ex.ToString & vbCrLf)
 					End Try
 				Else
-					Dim book As New Amazon_book(escapedURL)
+					Dim book As New ndl_book(escapedURL)
 					TextBox2.AppendText(vbTab & "\bibitem{}" & TeXescape(book.author) & ":" & TeXescape(escapedURL) & "," & book.publisher & ",p.(" & book.release_year & ") " & Now.ToString("yyyy/M/d") & "閲覧" & vbCrLf)
 				End If
 			Next
@@ -98,7 +98,7 @@ Public Class Form1
 		Return escapedText
 	End Function
 End Class
-Public Class Amazon_book
+Public Class ndl_book
 	Public author As String
 	Public publisher As String
 	Public release_year As String
@@ -107,14 +107,16 @@ Public Class Amazon_book
 		Dim wc As New WebClient
 		wc.Encoding = Encoding.UTF8
 
-		Dim html As String = wc.DownloadString("http://www.amazon.co.jp/s/ref=nb_sb_noss_1?__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&url=search-alias%3Dstripbooks&field-keywords=" & book_name)
+		Dim search_html As String = wc.DownloadString("http://iss.ndl.go.jp/books?ar=4e1f&any=" & book_name & "&display=&op_id=1&mediatype=1")
+		Dim first_item_URL As String = RegularExpressions.Regex.Match(search_html, "http://iss.ndl.go.jp/books/.+?(?="")").Value
 
-		Dim html_firstitem As String = RegularExpressions.Regex.Match(html, "result_[\s\S]+?</li>").Groups.Item(0).Value
-		For Each b As RegularExpressions.Match In RegularExpressions.Regex.Matches(RegularExpressions.Regex.Matches(html_firstitem, "a-row a-spacing-mini[\s\S]+?</div>").Item(1).Value, "(?<="">).+?(?=</span>)")
-			Dim tmp As String = b.Value
-			tmp = RegularExpressions.Regex.Replace(tmp, "<a.+?>", "")
-			tmp = RegularExpressions.Regex.Replace(tmp, "</a>", "")
-			author &= tmp.Replace(" ", "") & " "
-		Next
+		Dim book_info_html As String = wc.DownloadString(first_item_URL)
+		author = RegularExpressions.Regex.Match(book_info_html, "(?<=著者[\s\S]+"">).+?(?=</a>)").Value
+		author = author.Replace(" 著", "")
+		author = author.Replace(" 編", "")
+		author = author.Replace(",", "")
+
+		publisher = RegularExpressions.Regex.Match(book_info_html, "(?<=出版社</th><td>).+?(?=</td>)").Value
+		release_year = RegularExpressions.Regex.Match(book_info_html, "(?<=出版年[\s\S]+?<span>).+?(?=</span>)").Value
 	End Sub
 End Class
