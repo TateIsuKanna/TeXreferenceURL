@@ -70,7 +70,7 @@ Public Class Form1
 					End Try
 				Else
 					Dim book As New ndl_book(escapedURL)
-					TextBox2.AppendText(vbTab & "\bibitem{}" & TeXescape(book.author) & ":" & TeXescape(escapedURL) & "," & book.publisher & ",p.(" & book.release_year & ") " & Now.ToString("yyyy/M/d") & "閲覧" & vbCrLf)
+					TextBox2.AppendText(vbTab & "\bibitem{}" & TeXescape(book.author) & ":" & TeXescape(book.title) & "," & book.publisher & ",p.(" & book.release_year & ") " & Now.ToString("yyyy/M/d") & "閲覧" & vbCrLf)
 				End If
 			Next
 			TextBox2.AppendText("\end{thebibliography}")
@@ -99,6 +99,7 @@ Public Class Form1
 	End Function
 End Class
 Public Class ndl_book
+	Public title As String
 	Public author As String
 	Public publisher As String
 	Public release_year As String
@@ -106,14 +107,15 @@ Public Class ndl_book
 	Sub New(ByRef book_name As String)
 		Dim wc As New WebClient
 		wc.Encoding = Encoding.UTF8
-
 		Dim search_html As String = wc.DownloadString("http://iss.ndl.go.jp/books?ar=4e1f&any=" & book_name & "&display=&op_id=1&mediatype=1")
 		Dim first_item_URL As String = RegularExpressions.Regex.Match(search_html, "http://iss.ndl.go.jp/books/.+?(?="")").Value
 
 		Dim book_info_html As String = wc.DownloadString(first_item_URL)
-		author = RegularExpressions.Regex.Match(book_info_html, "(?<=著者[\s\S]+"">).+?(?=</a>)").Value
-		author = author.Replace(" 著", "")
-		author = author.Replace(" 編", "")
+		'HACK:ここまで書かなくても[\s\S]で済ませる?
+		title = RegularExpressions.Regex.Match(book_info_html, "(?<=contenttitle"">\n\s{2}<h1>\n\s{3}).+?(?=\n\s{2}</h1>)").Value
+
+		author = RegularExpressions.Regex.Match(book_info_html, "(?<=著者[\s\S]+?>).+?(?=</a>)").Value
+		author = RegularExpressions.Regex.Replace(author, "\s(共?著|編)$", "")
 		author = author.Replace(",", "")
 
 		publisher = RegularExpressions.Regex.Match(book_info_html, "(?<=出版社</th><td>).+?(?=</td>)").Value
