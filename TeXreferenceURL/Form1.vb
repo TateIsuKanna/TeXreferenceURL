@@ -70,7 +70,7 @@ Public Class Form1
 					End Try
 				Else
 					Dim book As New ndl_book(escapedURL)
-					TextBox2.AppendText(vbTab & "\bibitem{}" & TeXescape(book.author) & ":" & TeXescape(book.title) & "," & book.publisher & ",p.(" & book.release_year & ") " & Now.ToString("yyyy/M/d") & "閲覧" & vbCrLf)
+					TextBox2.AppendText(vbTab & "\bibitem{}" & TeXescape(book.author) & ":" & TeXescape(book.title) & "," & book.publisher & ",p.(" & book.release_year & ")" & vbCrLf)
 				End If
 			Next
 			TextBox2.AppendText("\end{thebibliography}")
