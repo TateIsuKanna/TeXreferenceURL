@@ -113,13 +113,13 @@ Public Class ndl_book
 
 		Dim book_info_html As String = wc.DownloadString(first_item_URL)
 		'HACK:ここまで書かなくても[\s\S]で済ませる?
-		title = RegularExpressions.Regex.Match(book_info_html, "(?<=contenttitle"">\n\s{2}<h1>\n\s{3}).+?(?=\n\s{2}</h1>)").Value
+		title = Web.HttpUtility.HtmlDecode(RegularExpressions.Regex.Match(book_info_html, "(?<=contenttitle"">\n\s{2}<h1>\n\s{3}).+?(?=\n\s{2}</h1>)").Value)
 
-		author = RegularExpressions.Regex.Match(book_info_html, "(?<=著者[\s\S]+?>).+?(?=</a>)").Value
+		author = Web.HttpUtility.HtmlDecode(RegularExpressions.Regex.Match(book_info_html, "(?<=著者[\s\S]+?>).+?(?=</a>)").Value)
 		author = RegularExpressions.Regex.Replace(author, "\s(共?著|編)$", "")
 		author = author.Replace(",", "")
 
-		publisher = RegularExpressions.Regex.Match(book_info_html, "(?<=出版社</th><td>).+?(?=</td>)").Value
+		publisher = Web.HttpUtility.HtmlDecode(RegularExpressions.Regex.Match(book_info_html, "(?<=出版社</th><td>).+?(?=</td>)").Value)
 		release_year = RegularExpressions.Regex.Match(book_info_html, "(?<=出版年[\s\S]+?<span>).+?(?=</span>)").Value
 	End Sub
 End Class
