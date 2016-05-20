@@ -61,7 +61,7 @@ Public Class Form1
 						Else
 							title_begin += "<title>".Length
 							Dim title_end As Integer = html.IndexOf("</title>", title_begin, StringComparison.CurrentCultureIgnoreCase)
-							title = html.Substring(title_begin, title_end - title_begin)
+							title = Web.HttpUtility.HtmlDecode(html.Substring(title_begin, title_end - title_begin))
 						End If
 
 						TextBox2.AppendText(vbTab & "\bibitem{}" & TeXescape(title) & "\\" & TeXescape(Web.HttpUtility.UrlDecode(escapedURL)) & " " & Now.ToString("yyyy/M/d") & "閲覧" & vbCrLf)
@@ -81,7 +81,7 @@ Public Class Form1
 	Private Function TeXescape(ByRef unescapedText As String) As String
 		Dim escapedText As String = unescapedText
 
-		escapedText = escapedText.Replace(" \ ", " \\ ") 'エスケープに使うから最初にエスケープ
+		escapedText = escapedText.Replace(" \ ", " $\backslash$ ") 'エスケープに使うから最初にエスケープ
 		escapedText = escapedText.Replace("_", "\_")
 		escapedText = escapedText.Replace("%", "\%")
 		escapedText = escapedText.Replace("#", "\#")
@@ -89,11 +89,12 @@ Public Class Form1
 		escapedText = escapedText.Replace("&", "\&")
 		escapedText = escapedText.Replace("{", "\{")
 		escapedText = escapedText.Replace("}", "\}")
-		escapedText = escapedText.Replace("<", "\<")
-		escapedText = escapedText.Replace(">", "\>")
 		escapedText = escapedText.Replace("^", "\^")
-		escapedText = escapedText.Replace("|", "\|")
 		escapedText = escapedText.Replace("~", "\~")
+
+		escapedText = escapedText.Replace("<", "$<$")
+		escapedText = escapedText.Replace(">", "$>$")
+		escapedText = escapedText.Replace("|", "$|$")
 
 		Return escapedText
 	End Function
