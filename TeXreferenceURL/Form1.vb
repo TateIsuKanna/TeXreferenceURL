@@ -34,6 +34,7 @@ Public Class Form1
 						html_byte = wc.DownloadData(escapedURL)
 						Dim ContentType As String = wc.ResponseHeaders.Item(HttpResponseHeader.ContentType)
 						Dim httpheader_charset_begin As Integer = ContentType.IndexOf("charset=")
+						wc.Dispose()
 
 						Dim html As String
 
@@ -61,6 +62,7 @@ Public Class Form1
 						Else
 							title_begin += "<title>".Length
 							Dim title_end As Integer = html.IndexOf("</title>", title_begin, StringComparison.CurrentCultureIgnoreCase)
+							'HACK:html全体をdecodeしてもいいかも
 							title = Web.HttpUtility.HtmlDecode(html.Substring(title_begin, title_end - title_begin))
 						End If
 
@@ -106,20 +108,23 @@ Public Class ndl_book
 	Public release_year As String
 
 	Sub New(ByRef book_name As String)
-		Dim wc As New WebClient
-		wc.Encoding = Encoding.UTF8
-		Dim search_html As String = wc.DownloadString("http://iss.ndl.go.jp/books?ar=4e1f&any=" & book_name & "&display=&op_id=1&mediatype=1")
-		Dim first_item_URL As String = RegularExpressions.Regex.Match(search_html, "http://iss.ndl.go.jp/books/.+?(?="")").Value
+		Using wc As New WebClient
+			wc.Encoding = Encoding.UTF8
+			Dim search_html As String = wc.DownloadString("http://iss.ndl.go.jp/books?ar=4e1f&any=" & book_name & "&display=&op_id=1&mediatype=1")
 
-		Dim book_info_html As String = wc.DownloadString(first_item_URL)
-		'HACK:ここまで書かなくても[\s\S]で済ませる?
-		title = Web.HttpUtility.HtmlDecode(RegularExpressions.Regex.Match(book_info_html, "(?<=contenttitle"">\n\s{2}<h1>\n\s{3}).+?(?=\n\s{2}</h1>)").Value)
+			'TODO:見つからなかった時の対処
+			Dim first_item_URL As String = RegularExpressions.Regex.Match(search_html, "http://iss.ndl.go.jp/books/.+?(?="")").Value
 
-		author = Web.HttpUtility.HtmlDecode(RegularExpressions.Regex.Match(book_info_html, "(?<=著者[\s\S]+?>).+?(?=</a>)").Value)
-		author = RegularExpressions.Regex.Replace(author, "\s(共?著|編)$", "")
-		author = author.Replace(",", "")
+			Dim book_info_html As String = Web.HttpUtility.HtmlDecode(wc.DownloadString(first_item_URL))
+			'HACK:ここまで書かなくても[\s\S]で済ませる?
+			title = RegularExpressions.Regex.Match(book_info_html, "(?<=contenttitle"">\n\s{2}<h1>\n\s{3}).+?(?=\n\s{2}</h1>)").Value
 
-		publisher = Web.HttpUtility.HtmlDecode(RegularExpressions.Regex.Match(book_info_html, "(?<=出版社</th><td>).+?(?=</td>)").Value)
-		release_year = RegularExpressions.Regex.Match(book_info_html, "(?<=出版年[\s\S]+?<span>).+?(?=</span>)").Value
+			author = RegularExpressions.Regex.Match(book_info_html, "(?<=著者[\s\S]+?>).+?(?=</a>)").Value
+			author = RegularExpressions.Regex.Replace(author, "\s(共?著|編)$", "")
+			author = author.Replace(",", "")
+
+			publisher = RegularExpressions.Regex.Match(book_info_html, "(?<=出版社</th><td>).+?(?=</td>)").Value
+			release_year = RegularExpressions.Regex.Match(book_info_html, "(?<=出版年[\s\S]+?<span>).+?(?=</span>)").Value
+		End Using
 	End Sub
 End Class
