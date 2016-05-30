@@ -14,7 +14,10 @@ Public Class Form1
 		End If
 
 		If e.Control AndAlso e.KeyCode = Keys.A Then
-			ListBox1.Items.Add(InputBox("URLか書名を入力して下さい．"))
+			Dim url As String = InputBox("URLか書名を入力して下さい．")
+			If url <> "" Then
+				ListBox1.Items.Add(url)
+			End If
 		End If
 
 		If ListBox1.SelectedIndex > -1 Then
