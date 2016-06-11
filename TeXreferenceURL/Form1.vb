@@ -30,13 +30,13 @@ Public Class Form1
 			TextBox2.Clear()
 			TextBox2.AppendText("\begin{thebibliography}{" & CStr(10 ^ (Math.Floor(Math.Log10(ListBox1.Items.Count)) + 1) - 1) & "}" & vbCrLf)
 			For Each escapedURL As String In ListBox1.Items
-				If RegularExpressions.Regex.IsMatch(escapedURL, "^https?") Then
+				If RegularExpressions.Regex.IsMatch(escapedURL, "^https?://", RegularExpressions.RegexOptions.IgnoreCase) Then
 					Try
 						Dim html_byte() As Byte
 						Dim wc As New WebClient
 						html_byte = wc.DownloadData(escapedURL)
 						Dim ContentType As String = wc.ResponseHeaders.Item(HttpResponseHeader.ContentType)
-						Dim httpheader_charset As String = RegularExpressions.Regex.Match(ContentType, "(?<=charset=).+").Value
+						Dim httpheader_charset As String = RegularExpressions.Regex.Match(ContentType, "(?<=charset=).+", RegularExpressions.RegexOptions.IgnoreCase).Value
 						wc.Dispose()
 
 						Dim html As String
@@ -44,7 +44,7 @@ Public Class Form1
 							html = Encoding.GetEncoding(httpheader_charset).GetString(html_byte)
 						Else
 							html = Encoding.ASCII.GetString(html_byte)
-							Dim charset As String = RegularExpressions.Regex.Match(html, "(?<=charset=""?)[^""]+(?="")").Value
+							Dim charset As String = RegularExpressions.Regex.Match(html, "(?<=charset=""?)[^""]+(?="")", RegularExpressions.RegexOptions.IgnoreCase).Value
 							If charset <> "" Then
 								html = Encoding.GetEncoding(charset).GetString(html_byte)
 							Else
@@ -52,16 +52,8 @@ Public Class Form1
 							End If
 						End If
 
-						Dim title As String
-						Dim title_begin As Integer = html.IndexOf("<title>", StringComparison.CurrentCultureIgnoreCase)
-						If title_begin = -1 Then
-							title = ""
-						Else
-							title_begin += "<title>".Length
-							Dim title_end As Integer = html.IndexOf("</title>", title_begin, StringComparison.CurrentCultureIgnoreCase)
-							'HACK:html全体をdecodeしてもいいかも
-							title = Web.HttpUtility.HtmlDecode(html.Substring(title_begin, title_end - title_begin))
-						End If
+						'HACK:html全体をdecodeしてもいいかも
+						Dim title As String = Web.HttpUtility.HtmlDecode(RegularExpressions.Regex.Match(html, "(?<=<title>).+?(?=</title>)", RegularExpressions.RegexOptions.IgnoreCase).Value)
 
 						TextBox2.AppendText(vbTab & "\bibitem{}" & TeXescape(title) & "\\" & TeXescape(Web.HttpUtility.UrlDecode(escapedURL)) & " " & Now.ToString("yyyy/M/d") & "閲覧" & vbCrLf)
 					Catch ex As Exception
