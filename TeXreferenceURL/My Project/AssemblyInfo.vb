@@ -9,10 +9,10 @@ Imports System.Runtime.InteropServices
 ' アセンブリ属性の値を確認します
 
 <Assembly: AssemblyTitle("TeXreferenceURL")>
-<Assembly: AssemblyDescription("")>
+<Assembly: AssemblyDescription("TeXの参考文献をURL，書名から生成")>
 <Assembly: AssemblyCompany("")>
 <Assembly: AssemblyProduct("TeXreferenceURL")>
-<Assembly: AssemblyCopyright("Copyright ©  2016")>
+<Assembly: AssemblyCopyright("Copyright ©  2016 縦椅子鉋 TateIsuKanna")>
 <Assembly: AssemblyTrademark("")>
 
 <Assembly: ComVisible(False)>

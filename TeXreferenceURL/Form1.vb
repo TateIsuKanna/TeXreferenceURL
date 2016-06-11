@@ -36,23 +36,17 @@ Public Class Form1
 						Dim wc As New WebClient
 						html_byte = wc.DownloadData(escapedURL)
 						Dim ContentType As String = wc.ResponseHeaders.Item(HttpResponseHeader.ContentType)
-						Dim httpheader_charset_begin As Integer = ContentType.IndexOf("charset=")
+						Dim httpheader_charset As String = RegularExpressions.Regex.Match(ContentType, "(?<=charset=).+").Value
 						wc.Dispose()
 
 						Dim html As String
-
-						If httpheader_charset_begin > -1 Then
-							httpheader_charset_begin += "charset=".Length
-							Dim htmlenc As String = ContentType.Substring(httpheader_charset_begin, ContentType.Length - httpheader_charset_begin)
-							html = Encoding.GetEncoding(htmlenc).GetString(html_byte)
+						If httpheader_charset <> "" Then
+							html = Encoding.GetEncoding(httpheader_charset).GetString(html_byte)
 						Else
 							html = Encoding.ASCII.GetString(html_byte)
-
-							Dim html_charset_begin As Integer = html.IndexOf("charset=")
-							If html_charset_begin > -1 Then
-								html_charset_begin += "charset=".Length
-								Dim htmlenc As String = html.Substring(html_charset_begin, html.IndexOf("""", html_charset_begin) - html_charset_begin)
-								html = Encoding.GetEncoding(htmlenc).GetString(html_byte)
+							Dim charset As String = RegularExpressions.Regex.Match(html, "(?<=charset=""?)[^""]+(?="")").Value
+							If charset <> "" Then
+								html = Encoding.GetEncoding(charset).GetString(html_byte)
 							Else
 								html = Encoding.UTF8.GetString(html_byte)
 							End If
