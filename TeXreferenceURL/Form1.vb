@@ -68,8 +68,12 @@ Public Class Form1
 						TextBox2.AppendText(vbCrLf & "エラー " & escapedURL & "について" & vbCrLf & ex.ToString & vbCrLf)
 					End Try
 				Else
-					Dim book As New ndl_book(escapedURL)
-					TextBox2.AppendText(vbTab & "\bibitem{}" & TeXescape(book.author) & ":" & TeXescape(book.title) & "," & book.publisher & ",p.(" & book.release_year & ")" & vbCrLf)
+					Try
+						Dim book As New ndl_book(escapedURL)
+						TextBox2.AppendText(vbTab & "\bibitem{}" & TeXescape(book.author) & ":" & TeXescape(book.title) & "," & book.publisher & ",p.(" & book.release_year & ")" & vbCrLf)
+					Catch ex As Exception
+						TextBox2.AppendText(escapedURL & ex.Message & vbCrLf)
+					End Try
 				End If
 			Next
 			TextBox2.AppendText("\end{thebibliography}")
@@ -109,8 +113,11 @@ Public Class ndl_book
 			wc.Encoding = Encoding.UTF8
 			Dim search_html As String = wc.DownloadString("http://iss.ndl.go.jp/books?ar=4e1f&any=" & book_name & "&display=&op_id=1&mediatype=1")
 
-			'TODO:見つからなかった時の対処
 			Dim first_item_URL As String = RegularExpressions.Regex.Match(search_html, "http://iss.ndl.go.jp/books/.+?(?="")").Value
+
+			If first_item_URL = "" Then
+				Throw New ArgumentException("書籍が見つかりませんでした．")
+			End If
 
 			Dim book_info_html As String = Web.HttpUtility.HtmlDecode(wc.DownloadString(first_item_URL))
 			'HACK:ここまで書かなくても[\s\S]で済ませる?

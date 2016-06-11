@@ -40,7 +40,7 @@ Partial Class Form1
 		Me.TextBox2.Name = "TextBox2"
 		Me.TextBox2.ReadOnly = True
 		Me.TextBox2.ScrollBars = System.Windows.Forms.ScrollBars.Both
-		Me.TextBox2.Size = New System.Drawing.Size(720, 162)
+		Me.TextBox2.Size = New System.Drawing.Size(744, 162)
 		Me.TextBox2.TabIndex = 0
 		Me.TextBox2.WordWrap = False
 		'
@@ -49,9 +49,10 @@ Partial Class Form1
 		Me.Label1.AutoSize = True
 		Me.Label1.Location = New System.Drawing.Point(12, 9)
 		Me.Label1.Name = "Label1"
-		Me.Label1.Size = New System.Drawing.Size(539, 12)
+		Me.Label1.Size = New System.Drawing.Size(747, 12)
 		Me.Label1.TabIndex = 0
-		Me.Label1.Text = "URLか書名を列挙して下さい．Ctrl+V:貼り付け Ctrl+A:手入力追加 ↑↓:選択 Del:削除 Ctrl+Shift+Enter:生成"
+		Me.Label1.Text = "URLか書名を列挙して下さい．Ctrl+V:貼り付け Ctrl+A:手入力追加 ↑↓:選択 Del:削除 Ctrl+Shift+Enter:生成 ※書籍情報取得に" &
+	"は割りと掛かっちゃうかも"
 		'
 		'SplitContainer1
 		'
@@ -69,7 +70,7 @@ Partial Class Form1
 		'SplitContainer1.Panel2
 		'
 		Me.SplitContainer1.Panel2.Controls.Add(Me.TextBox2)
-		Me.SplitContainer1.Size = New System.Drawing.Size(720, 331)
+		Me.SplitContainer1.Size = New System.Drawing.Size(744, 331)
 		Me.SplitContainer1.SplitterDistance = 165
 		Me.SplitContainer1.TabIndex = 8
 		'
@@ -80,14 +81,14 @@ Partial Class Form1
 		Me.ListBox1.ItemHeight = 12
 		Me.ListBox1.Location = New System.Drawing.Point(0, 0)
 		Me.ListBox1.Name = "ListBox1"
-		Me.ListBox1.Size = New System.Drawing.Size(720, 165)
+		Me.ListBox1.Size = New System.Drawing.Size(744, 165)
 		Me.ListBox1.TabIndex = 9
 		'
 		'Form1
 		'
 		Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 12.0!)
 		Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-		Me.ClientSize = New System.Drawing.Size(746, 376)
+		Me.ClientSize = New System.Drawing.Size(770, 376)
 		Me.Controls.Add(Me.SplitContainer1)
 		Me.Controls.Add(Me.Label1)
 		Me.Name = "Form1"
