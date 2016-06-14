@@ -34,10 +34,11 @@ Public Class Form1
 					Try
 						Dim html_byte() As Byte
 						Dim wc As New WebClient
+						wc.Proxy = Nothing '要らないかもね
 						html_byte = wc.DownloadData(escapedURL)
 						Dim ContentType As String = wc.ResponseHeaders.Item(HttpResponseHeader.ContentType)
-						Dim httpheader_charset As String = RegularExpressions.Regex.Match(ContentType, "(?<=charset=).+", RegularExpressions.RegexOptions.IgnoreCase).Value
 						wc.Dispose()
+						Dim httpheader_charset As String = RegularExpressions.Regex.Match(ContentType, "(?<=charset=).+", RegularExpressions.RegexOptions.IgnoreCase).Value
 
 						Dim html As String
 						If httpheader_charset <> "" Then
@@ -61,10 +62,10 @@ Public Class Form1
 					End Try
 				Else
 					Try
-						Dim book As New ndl_book(escapedURL)
+						Dim book As ndl.book_info = ndl.download_book_info(escapedURL)
 						TextBox2.AppendText(vbTab & "\bibitem{}" & TeXescape(book.author) & ":" & TeXescape(book.title) & "," & book.publisher & ",p.(" & book.release_year & ")" & vbCrLf)
 					Catch ex As Exception
-						TextBox2.AppendText(escapedURL & ex.Message & vbCrLf)
+						TextBox2.AppendText(vbTab & vbTab & escapedURL & ":" & ex.Message & vbCrLf)
 					End Try
 				End If
 			Next
@@ -94,33 +95,49 @@ Public Class Form1
 		Return escapedText
 	End Function
 End Class
-Public Class ndl_book
-	Public title As String
-	Public author As String
-	Public publisher As String
-	Public release_year As String
+Public Class ndl
+	Shared cookie As New CookieContainer
 
-	Sub New(ByRef book_name As String)
-		Using wc As New WebClient
-			wc.Encoding = Encoding.UTF8
-			Dim search_html As String = wc.DownloadString("http://iss.ndl.go.jp/books?ar=4e1f&any=" & book_name & "&display=&op_id=1&mediatype=1")
-
-			Dim first_item_URL As String = RegularExpressions.Regex.Match(search_html, "http://iss.ndl.go.jp/books/.+?(?="")").Value
-
-			If first_item_URL = "" Then
-				Throw New ArgumentException("書籍が見つかりませんでした．")
-			End If
-
-			Dim book_info_html As String = Web.HttpUtility.HtmlDecode(wc.DownloadString(first_item_URL))
-			'HACK:ここまで書かなくても[\s\S]で済ませる?
-			title = RegularExpressions.Regex.Match(book_info_html, "(?<=contenttitle"">\n\s{2}<h1>\n\s{3}).+?(?=\n\s{2}</h1>)").Value
-
-			author = RegularExpressions.Regex.Match(book_info_html, "(?<=著者[\s\S]+?>).+?(?=</a>)").Value
-			author = RegularExpressions.Regex.Replace(author, "\s(共?著|編)$", "")
-			author = author.Replace(",", "")
-
-			publisher = RegularExpressions.Regex.Match(book_info_html, "(?<=出版社</th><td>).+?(?=</td>)").Value
-			release_year = RegularExpressions.Regex.Match(book_info_html, "(?<=出版年[\s\S]+?<span>).+?(?=</span>)").Value
+	Public Shared Function download_book_info(ByRef book_name As String) As book_info
+		Dim search_html As String
+		Dim HTTPreq As HttpWebRequest = WebRequest.CreateHttp("http://iss.ndl.go.jp/books?op_id=1&any=" & book_name & "&mediatype=1")
+		HTTPreq.CookieContainer = cookie
+		Using APIsr As New IO.StreamReader(HTTPreq.GetResponse.GetResponseStream(), Encoding.UTF8)
+			search_html = APIsr.ReadToEnd
 		End Using
-	End Sub
+
+		Dim first_item_URL As String = RegularExpressions.Regex.Match(search_html, "http://iss.ndl.go.jp/books/.+?(?="")").Value
+
+		If first_item_URL = "" Then
+			Throw New ArgumentException("書籍が見つかりませんでした．")
+		End If
+
+		Dim HTTPreq2 As HttpWebRequest = WebRequest.CreateHttp(first_item_URL)
+		HTTPreq2.CookieContainer = cookie
+		Dim book_info_html As String
+		Using APIsr As New IO.StreamReader(HTTPreq2.GetResponse.GetResponseStream(), Encoding.UTF8)
+			'HACK:emタグだけへの対処はちょっと・・・やっぱりWebClientのDownloadString使いたい
+			book_info_html = Web.HttpUtility.HtmlDecode(RegularExpressions.Regex.Replace(APIsr.ReadToEnd, "</?em.*?>", ""))
+		End Using
+
+		Dim res_book_info As book_info
+
+		res_book_info.title = RegularExpressions.Regex.Match(book_info_html, "(?<= contenttitle"">\n\s{2}<h1>\n\s{3}).+?(?=\ n \ s{2}</h1>)").Value
+
+		res_book_info.author = RegularExpressions.Regex.Match(book_info_html, "(?<=著者[\s\S]+?>).+?(?=</a>)").Value
+		res_book_info.author = RegularExpressions.Regex.Replace(res_book_info.author, "\s(共?著|編)$", "")
+		res_book_info.author = res_book_info.author.Replace(",", "")
+
+		res_book_info.publisher = RegularExpressions.Regex.Match(book_info_html, "(?<=出版社</th><td>).+?(?=</td>)").Value
+		res_book_info.release_year = RegularExpressions.Regex.Match(book_info_html, "(?<=出版年[\s\S]+?<span>).+?(?=</span>)").Value
+
+		Return res_book_info
+	End Function
+
+	Public Structure book_info
+		Public title As String
+		Public author As String
+		Public publisher As String
+		Public release_year As String
+	End Structure
 End Class
