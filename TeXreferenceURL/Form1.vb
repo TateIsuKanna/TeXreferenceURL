@@ -121,8 +121,7 @@ Public Class ndl
 		End Using
 
 		Dim res_book_info As book_info
-
-		res_book_info.title = RegularExpressions.Regex.Match(book_info_html, "(?<= contenttitle"">\n\s{2}<h1>\n\s{3}).+?(?=\ n \ s{2}</h1>)").Value
+		res_book_info.title = RegularExpressions.Regex.Match(book_info_html, "(?<=contenttitle"">\n\s{2}<h1>\n\s{3}).+?(?=\n\s{2}</h1>)").Value
 
 		res_book_info.author = RegularExpressions.Regex.Match(book_info_html, "(?<=著者[\s\S]+?>).+?(?=</a>)").Value
 		res_book_info.author = RegularExpressions.Regex.Replace(res_book_info.author, "\s(共?著|編)$", "")
