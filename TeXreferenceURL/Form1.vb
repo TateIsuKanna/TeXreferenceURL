@@ -29,13 +29,13 @@ Public Class Form1
 		If e.Control AndAlso e.Shift AndAlso e.KeyCode = Keys.Enter Then
 			TextBox2.Clear()
 			TextBox2.AppendText("\begin{thebibliography}{" & CStr(10 ^ (Math.Floor(Math.Log10(ListBox1.Items.Count)) + 1) - 1) & "}" & vbCrLf)
-			For Each escapedURL As String In ListBox1.Items
-				If RegularExpressions.Regex.IsMatch(escapedURL, "^https?://", RegularExpressions.RegexOptions.IgnoreCase) Then
+			For Each urlescapedURL As String In ListBox1.Items
+				If RegularExpressions.Regex.IsMatch(urlescapedURL, "^https?://", RegularExpressions.RegexOptions.IgnoreCase) Then
 					Try
 						Dim html_byte() As Byte
 						Dim wc As New WebClient
 						wc.Proxy = Nothing '要らないかもね
-						html_byte = wc.DownloadData(escapedURL)
+						html_byte = wc.DownloadData(urlescapedURL)
 						Dim ContentType As String = wc.ResponseHeaders.Item(HttpResponseHeader.ContentType)
 						wc.Dispose()
 						Dim httpheader_charset As String = RegularExpressions.Regex.Match(ContentType, "(?<=charset=).+", RegularExpressions.RegexOptions.IgnoreCase).Value
@@ -56,16 +56,16 @@ Public Class Form1
 						'HACK:html全体をdecodeしてもいいかも
 						Dim title As String = Web.HttpUtility.HtmlDecode(RegularExpressions.Regex.Match(html, "(?<=<title>).+?(?=</title>)", RegularExpressions.RegexOptions.IgnoreCase).Value)
 
-						TextBox2.AppendText(vbTab & "\bibitem{}" & TeXescape(title) & "\\" & TeXescape(Web.HttpUtility.UrlDecode(escapedURL)) & " " & Now.ToString("yyyy/M/d") & "閲覧" & vbCrLf)
+						TextBox2.AppendText(vbTab & "\bibitem{}" & TeXescape(title) & "\\" & "\url{" & Web.HttpUtility.UrlDecode(urlescapedURL).Replace("}", "\}") & "} " & Now.ToString("yyyy/M/d") & "閲覧" & vbCrLf)
 					Catch ex As Exception
-						TextBox2.AppendText(vbCrLf & "エラー " & escapedURL & "について" & vbCrLf & ex.ToString & vbCrLf)
+						TextBox2.AppendText(vbCrLf & "エラー " & urlescapedURL & "について" & vbCrLf & ex.ToString & vbCrLf)
 					End Try
 				Else
 					Try
-						Dim book As ndl.book_info = ndl.download_book_info(escapedURL)
+						Dim book As ndl.book_info = ndl.download_book_info(urlescapedURL)
 						TextBox2.AppendText(vbTab & "\bibitem{}" & TeXescape(book.author) & ":" & TeXescape(book.title) & "," & book.publisher & ",p.(" & book.release_year & ")" & vbCrLf)
 					Catch ex As Exception
-						TextBox2.AppendText(vbTab & vbTab & escapedURL & ":" & ex.Message & vbCrLf)
+						TextBox2.AppendText(vbTab & vbTab & urlescapedURL & ":" & ex.Message & vbCrLf)
 					End Try
 				End If
 			Next
