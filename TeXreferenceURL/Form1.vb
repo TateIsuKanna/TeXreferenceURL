@@ -55,8 +55,8 @@ Public Class Form1
 
 						'HACK:html全体をdecodeしてもいいかも
 						Dim title As String = Web.HttpUtility.HtmlDecode(RegularExpressions.Regex.Match(html, "(?<=<title>).+?(?=</title>)", RegularExpressions.RegexOptions.IgnoreCase).Value)
-
-						TextBox2.AppendText(vbTab & "\bibitem{}" & TeXescape(title) & "\\" & "\url{" & Web.HttpUtility.UrlDecode(urlescapedURL).Replace("}", "\}") & "} " & Now.ToString("yyyy/M/d") & "閲覧" & vbCrLf)
+						'TODO:url.styの仕様詳細の確認した方がより良いね
+						TextBox2.AppendText(vbTab & "\bibitem{}" & TeXescape(title) & "\\" & "\url{" & Web.HttpUtility.UrlDecode(urlescapedURL).Replace("}", "") & "} " & Now.ToString("yyyy/M/d") & "閲覧" & vbCrLf)
 					Catch ex As Exception
 						TextBox2.AppendText(vbCrLf & "エラー " & urlescapedURL & "について" & vbCrLf & ex.ToString & vbCrLf)
 					End Try
