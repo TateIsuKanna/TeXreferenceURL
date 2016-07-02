@@ -28,6 +28,7 @@ Public Class Form1
 
 		If e.Control AndAlso e.Shift AndAlso e.KeyCode = Keys.Enter Then
 			TextBox2.Clear()
+			TextBox2.BackColor = SystemColors.Control
 			TextBox2.AppendText("\begin{thebibliography}{" & CStr(10 ^ (Math.Floor(Math.Log10(ListBox1.Items.Count)) + 1) - 1) & "}" & vbCrLf)
 			For Each urlescapedURL As String In ListBox1.Items
 				If RegularExpressions.Regex.IsMatch(urlescapedURL, "^https?://", RegularExpressions.RegexOptions.IgnoreCase) Then
@@ -58,6 +59,7 @@ Public Class Form1
 						'TODO:url.styの仕様詳細の確認した方がより良いね
 						TextBox2.AppendText(vbTab & "\bibitem{}" & TeXescape(title) & "\\" & "\url{" & Web.HttpUtility.UrlDecode(urlescapedURL).Replace("}", "") & "} " & Now.ToString("yyyy/M/d") & "閲覧" & vbCrLf)
 					Catch ex As Exception
+						TextBox2.BackColor = Color.Red
 						TextBox2.AppendText(vbCrLf & "エラー " & urlescapedURL & "について" & vbCrLf & ex.ToString & vbCrLf)
 					End Try
 				Else
@@ -65,6 +67,7 @@ Public Class Form1
 						Dim book As ndl.book_info = ndl.download_book_info(urlescapedURL)
 						TextBox2.AppendText(vbTab & "\bibitem{}" & TeXescape(book.author) & ":" & TeXescape(book.title) & "," & book.publisher & ",p.(" & book.release_year & ")" & vbCrLf)
 					Catch ex As Exception
+						TextBox2.BackColor = Color.Red
 						TextBox2.AppendText(vbTab & vbTab & urlescapedURL & ":" & ex.Message & vbCrLf)
 					End Try
 				End If
