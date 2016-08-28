@@ -1,7 +1,9 @@
 # TeXreferenceURL
 TeXの参考文献をURL，書名から生成
+Make TeX thebibliography from URL or book name.
 ## Requirement
 プリアンブルに
+Required preamble
 	
 	\usepackage{url}
 	
